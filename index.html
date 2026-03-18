@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Noor Al-Islam — A comprehensive Islamic hub with Quran reader, prayer times, sun clock, dhikr counters, mood sync, and Abdah — your Islamic guide.">
+<title>نور الإسلام — Noor Al-Islam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════ */
+:root {
+  --gold: #C8A96E;
+  --gold-light: #E8D5A3;
+  --gold-dim: #8B6914;
+  --emerald: #1A4A3C;
+  --emerald-mid: #0F2D24;
+  --emerald-dark: #071A14;
+  --cream: #F5EDD8;
+  --cream-dim: #D4C49A;
+  --text-main: #F0E6CC;
+  --text-dim: #A89060;
+  --shadow-gold: 0 0 40px rgba(200,169,110,0.3);
+  --border-gold: 1px solid rgba(200,169,110,0.3);
+  --radius: 8px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--emerald-dark);
+  color: var(--text-main);
+  font-family: 'Cormorant Garamond', serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--emerald-dark); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+/* ── Background layers ── */
+.geo-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(26,74,60,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(200,169,110,0.06) 0%, transparent 60%),
+    linear-gradient(180deg, var(--emerald-dark) 0%, #0A1F18 50%, var(--emerald-dark) 100%);
+}
+.geo-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(200,169,110,0.015) 40px, rgba(200,169,110,0.015) 41px),
+    repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(200,169,110,0.015) 40px, rgba(200,169,110,0.015) 41px);
+}
+.stars-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.star-dot {
+  position: absolute;
+  background: var(--gold-light);
+  border-radius: 50%;
+  animation: twinkle var(--d, 3s) ease-in-out infinite alternate;
+}
+@keyframes twinkle { from { opacity: 0.1; } to { opacity: 0.85; } }
+.content-wrap { position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 40px;
+  background: linear-gradient(180deg, rgba(7,26,20,0.97), rgba(7,26,20,0.75));
+  backdrop-filter: blur(20px);
+  border-bottom: var(--border-gold);
+}
+.nav-logo { font-family: 'Amiri', serif; font-size: 1.6rem; color: var(--gold); text-shadow: 0 0 20px rgba(200,169,110,0.5); letter-spacing: 2px; cursor: pointer; }
+.nav-links { display: flex; gap: 20px; list-style: none; }
+.nav-links a { color: var(--cream-dim); text-decoration: none; font-size: 0.78rem; letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.3s, text-shadow 0.3s; }
+.nav-links a:hover { color: var(--gold); text-shadow: 0 0 15px rgba(200,169,110,0.6); }
+.nav-clock { font-family: 'Amiri', serif; font-size: 0.88rem; color: var(--gold-light); text-align: right; line-height: 1.4; }
+@media (max-width: 768px) { nav { padding: 12px 16px; } .nav-links { display: none; } }
+
+/* ═══════════════════════════════════════
+   SCROLLING BANNER
+═══════════════════════════════════════ */
+#banner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
+  background: linear-gradient(90deg, var(--emerald-dark), var(--emerald-mid), var(--emerald-dark));
+  border-top: 1px solid var(--gold-dim);
+  padding: 10px 40px;
+  display: none; align-items: center; gap: 16px;
+  animation: slideUp 0.5s ease;
+  transition: opacity 0.5s;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.banner-icon { font-size: 1.4rem; flex-shrink: 0; }
+.banner-label { font-family: 'Cinzel Decorative', serif; font-size: 0.62rem; letter-spacing: 3px; padding: 3px 10px; border-radius: 2px; font-weight: 700; flex-shrink: 0; }
+.banner-halal .banner-label { background: rgba(26,200,100,0.2); color: #4ADE80; border: 1px solid #4ADE80; }
+.banner-haram .banner-label { background: rgba(200,50,50,0.2); color: #F87171; border: 1px solid #F87171; }
+.banner-text { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--cream); flex: 1; }
+.banner-close { cursor: pointer; color: var(--text-dim); font-size: 1.2rem; padding: 4px 8px; transition: color 0.2s; flex-shrink: 0; user-select: none; }
+.banner-close:hover { color: var(--gold); }
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+#hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 120px 40px 80px;
+}
+.bismillah {
+  font-family: 'Amiri', serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  color: var(--gold);
+  margin-bottom: 24px;
+  animation: fadeGlow 3s ease-in-out infinite alternate;
+}
+@keyframes fadeGlow {
+  from { text-shadow: 0 0 40px rgba(200,169,110,0.4); }
+  to   { text-shadow: 0 0 80px rgba(200,169,110,0.9), 0 0 160px rgba(200,169,110,0.3); }
+}
+.hero-title { font-family: 'Cinzel Decorative', serif; font-size: clamp(1rem, 2.5vw, 1.8rem); letter-spacing: 6px; color: var(--cream-dim); margin-bottom: 16px; text-transform: uppercase; }
+.hero-sub { font-size: 1.1rem; color: var(--text-dim); font-style: italic; max-width: 500px; line-height: 1.8; margin-bottom: 40px; }
+.hero-divider { width: 200px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 0 auto 40px; }
+.hero-divine-msg {
+  background: rgba(26,74,60,0.4); border: var(--border-gold); border-radius: var(--radius);
+  padding: 20px 40px; max-width: 700px;
+  font-family: 'Amiri', serif; font-size: 1.05rem; color: var(--cream); line-height: 1.9;
+  position: relative; backdrop-filter: blur(10px);
+}
+.hero-divine-msg::before { content: '\201C'; font-family: 'Amiri', serif; font-size: 4rem; color: var(--gold-dim); position: absolute; top: -10px; left: 16px; line-height: 1; }
+.hero-actions { margin-top: 40px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+@media (max-width: 600px) { .hero-divine-msg { padding: 16px 20px; } }
+
+/* ═══════════════════════════════════════
+   SHARED SECTION STYLES
+═══════════════════════════════════════ */
+.section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+@media (max-width: 768px) { .section { padding: 60px 16px; } }
+.section-header { text-align: center; margin-bottom: 50px; }
+.section-label { font-family: 'Cinzel Decorative', serif; font-size: 0.62rem; letter-spacing: 5px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 12px; display: block; }
+.section-title { font-family: 'Amiri', serif; font-size: clamp(1.8rem, 3vw, 3rem); color: var(--gold); margin-bottom: 8px; }
+.section-sub { color: var(--text-dim); font-style: italic; margin-top: 8px; font-size: 0.95rem; }
+.section-divider { width: 100px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 16px auto 0; }
+.card {
+  background: rgba(15,45,36,0.5); border: var(--border-gold); border-radius: var(--radius);
+  padding: 28px; backdrop-filter: blur(10px);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-gold); border-color: rgba(200,169,110,0.6); }
+.divine-box {
+  background: linear-gradient(135deg, rgba(26,74,60,0.6), rgba(15,45,36,0.6));
+  border: 1px solid var(--gold); border-radius: var(--radius);
+  padding: 28px; text-align: center; margin-top: 40px; position: relative; overflow: hidden;
+}
+.divine-box::before, .divine-box::after { content: '✦'; position: absolute; font-size: 5rem; color: rgba(200,169,110,0.05); font-family: 'Amiri', serif; }
+.divine-box::before { top: -10px; left: 10px; }
+.divine-box::after  { bottom: -10px; right: 10px; }
+.divine-box-text { font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--cream); line-height: 1.8; position: relative; z-index: 1; }
+.divine-box-ref  { font-size: 0.78rem; color: var(--gold-dim); margin-top: 10px; letter-spacing: 1px; position: relative; z-index: 1; }
+.btn {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  color: var(--emerald-dark); border: none;
+  padding: 11px 26px; border-radius: var(--radius);
+  font-family: 'Cinzel Decorative', serif; font-size: 0.62rem; letter-spacing: 2px;
+  cursor: pointer; transition: all 0.3s; text-transform: uppercase; text-decoration: none;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,169,110,0.4); }
+.btn-outline { background: transparent; border: var(--border-gold); color: var(--gold); }
+.btn-outline:hover { background: rgba(200,169,110,0.1); }
+.loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--text-dim); font-style: italic; gap: 12px; }
+.spinner { width: 20px; height: 20px; border: 2px solid rgba(200,169,110,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════
+   SUN PANORAMA
+═══════════════════════════════════════ */
+.sun-wrap { border-radius: 14px; overflow: hidden; border: var(--border-gold); box-shadow: 0 0 60px rgba(0,0,0,0.5); }
+.sun-canvas-wrap { position: relative; width: 100%; height: 340px; }
+#sunCanvas { display: block; width: 100%; height: 100%; }
+.sun-overlay {
+  position: absolute; z-index: 5; pointer-events: none;
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(8px);
+  border: var(--border-gold); border-radius: 10px; padding: 10px 16px;
+}
+.sun-overlay-left  { top: 16px; left: 18px; }
+.sun-overlay-right { top: 16px; right: 18px; text-align: right; }
+.sol-phase { font-family: 'Amiri', serif; font-size: 1.2rem; color: var(--gold); }
+.sol-sub   { font-size: 0.68rem; letter-spacing: 2px; color: rgba(240,230,204,0.7); margin-top: 2px; }
+.sol-time  { font-family: 'Amiri', serif; font-size: 1.35rem; color: var(--gold-light); }
+.sol-date  { font-size: 0.68rem; letter-spacing: 1px; color: rgba(240,230,204,0.6); margin-top: 2px; }
+.sun-info-row {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  background: rgba(5,14,10,0.92);
+  border-top: 1px solid rgba(200,169,110,0.2);
+}
+@media (max-width: 560px) { .sun-info-row { grid-template-columns: repeat(3, 1fr); } }
+.sib { text-align: center; padding: 12px 6px; border-right: 1px solid rgba(200,169,110,0.1); }
+.sib:last-child { border-right: none; }
+.sib-val { font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--gold-light); }
+.sib-lbl { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-top: 3px; }
+
+/* ═══════════════════════════════════════
+   PRAYER TIMES
+═══════════════════════════════════════ */
+.prayer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+.prayer-card {
+  background: rgba(15,45,36,0.6); border: var(--border-gold); border-radius: var(--radius);
+  padding: 20px 14px; text-align: center;
+  position: relative; overflow: hidden; transition: all 0.3s;
+}
+.prayer-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-gold); }
+.prayer-card.active { border-color: var(--gold); background: rgba(200,169,110,0.1); box-shadow: 0 0 30px rgba(200,169,110,0.2); }
+.prayer-card.active::after {
+  content: 'NOW'; position: absolute; top: 8px; right: 8px;
+  font-size: 0.55rem; background: var(--gold); color: var(--emerald-dark);
+  padding: 2px 6px; border-radius: 2px; font-family: 'Cinzel Decorative', serif; letter-spacing: 1px;
+}
+.prayer-name-ar  { font-family: 'Amiri', serif; font-size: 1.3rem; color: var(--gold-light); display: block; margin-bottom: 4px; }
+.prayer-name-en  { font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 12px; }
+.prayer-time-val { font-size: 1.4rem; color: var(--cream); font-weight: 300; }
+
+/* ═══════════════════════════════════════
+   QURAN READER
+═══════════════════════════════════════ */
+.quran-controls { display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; align-items: center; }
+.quran-select {
+  background: rgba(15,45,36,0.85); border: var(--border-gold); color: var(--cream);
+  padding: 10px 14px; border-radius: var(--radius);
+  font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+  outline: none; cursor: pointer; flex: 1; min-width: 160px;
+  transition: border-color 0.2s;
+}
+.quran-select:focus { border-color: var(--gold); }
+.quran-select option { background: var(--emerald-dark); }
+.lang-btn-group { display: flex; gap: 7px; flex-wrap: wrap; }
+.lang-btn {
+  background: rgba(15,45,36,0.6); border: var(--border-gold);
+  color: var(--cream-dim); padding: 6px 13px; border-radius: 4px;
+  font-size: 0.72rem; cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
+}
+.lang-btn:hover, .lang-btn.active { background: rgba(200,169,110,0.15); color: var(--gold); border-color: var(--gold); }
+.quran-verse-container { max-height: 520px; overflow-y: auto; padding-right: 6px; }
+.verse-item {
+  display: flex; gap: 18px; padding: 18px 0;
+  border-bottom: 1px solid rgba(200,169,110,0.1); align-items: flex-start;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.verse-num {
+  min-width: 38px; height: 38px;
+  border: var(--border-gold); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Amiri', serif; font-size: 0.82rem; color: var(--gold); flex-shrink: 0;
+}
+.verse-content { flex: 1; }
+.verse-arabic { font-family: 'Amiri', serif; font-size: 1.55rem; color: var(--cream); line-height: 2.2; text-align: right; direction: rtl; margin-bottom: 8px; }
+.verse-translation { font-style: italic; color: var(--text-dim); font-size: 0.92rem; line-height: 1.7; }
+.quran-nav { display: flex; gap: 12px; margin-top: 20px; justify-content: center; }
+
+/* ═══════════════════════════════════════
+   MOOD SYNC
+═══════════════════════════════════════ */
+.mood-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 13px; margin-bottom: 30px; }
+.mood-btn {
+  background: rgba(15,45,36,0.5); border: var(--border-gold);
+  color: var(--cream-dim); padding: 18px 12px; border-radius: var(--radius);
+  cursor: pointer; text-align: center; transition: all 0.3s;
+  font-family: 'Cormorant Garamond', serif; user-select: none;
+}
+.mood-btn .mood-emoji { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+.mood-btn .mood-label { font-size: 0.82rem; letter-spacing: 1px; }
+.mood-btn:hover, .mood-btn.selected { background: rgba(200,169,110,0.15); border-color: var(--gold); color: var(--gold); transform: translateY(-3px); box-shadow: var(--shadow-gold); }
+.mood-phrase {
+  background: rgba(15,45,36,0.6); border-left: 3px solid var(--gold);
+  padding: 22px 26px; border-radius: 0 var(--radius) var(--radius) 0;
+  margin-top: 22px; display: none; animation: fadeIn 0.5s ease;
+}
+.mood-phrase.visible { display: block; }
+.mood-phrase-ar { font-family: 'Amiri', serif; font-size: 1.45rem; color: var(--gold-light); text-align: right; direction: rtl; margin-bottom: 8px; }
+.mood-phrase-en { font-style: italic; color: var(--text-dim); font-size: 0.93rem; margin-bottom: 8px; line-height: 1.6; }
+.mood-phrase-src { font-size: 0.78rem; color: var(--gold-dim); letter-spacing: 1px; }
+.mood-log { margin-top: 22px; }
+.mood-log-title { font-family: 'Cinzel Decorative', serif; font-size: 0.62rem; letter-spacing: 3px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 10px; }
+.mood-log-list { display: flex; flex-direction: column; gap: 7px; max-height: 200px; overflow-y: auto; }
+.mood-log-item { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: rgba(15,45,36,0.4); border: var(--border-gold); border-radius: var(--radius); font-size: 0.84rem; color: var(--text-dim); }
+.mood-log-time { color: var(--gold-dim); font-size: 0.72rem; margin-left: auto; }
+
+/* ═══════════════════════════════════════
+   DHIKR COUNTER
+═══════════════════════════════════════ */
+.dhikr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.dhikr-card {
+  background: rgba(15,45,36,0.5); border: var(--border-gold); border-radius: var(--radius);
+  padding: 26px; position: relative; overflow: hidden; transition: all 0.3s;
+}
+.dhikr-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-gold); }
+.dhikr-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: linear-gradient(180deg, var(--gold), transparent); }
+.dhikr-time { font-family: 'Cinzel Decorative', serif; font-size: 0.58rem; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.dhikr-time::after { content: ''; flex: 1; height: 1px; background: rgba(200,169,110,0.2); }
+.dhikr-arabic { font-family: 'Amiri', serif; font-size: 1.35rem; color: var(--cream); text-align: right; direction: rtl; line-height: 2; margin-bottom: 8px; }
+.dhikr-translation { color: var(--text-dim); font-size: 0.88rem; font-style: italic; margin-bottom: 14px; line-height: 1.6; }
+.dhikr-footer { display: flex; align-items: center; justify-content: space-between; }
+.dhikr-rep { font-size: 0.78rem; color: var(--gold-dim); letter-spacing: 1px; }
+.dhikr-controls { display: flex; align-items: center; gap: 10px; }
+.dhikr-btn {
+  background: rgba(200,169,110,0.1); border: var(--border-gold); color: var(--gold);
+  width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+  font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; user-select: none;
+}
+.dhikr-btn:hover { background: rgba(200,169,110,0.25); }
+.dhikr-btn:active { transform: scale(0.88); }
+.dhikr-tally { font-family: 'Amiri', serif; font-size: 1.2rem; color: var(--gold-light); min-width: 40px; text-align: center; }
+
+/* ═══════════════════════════════════════
+   ISLAMIC CALENDAR
+═══════════════════════════════════════ */
+.calendar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+@media (max-width: 700px) { .calendar-grid { grid-template-columns: 1fr; } }
+.cal-card { background: rgba(15,45,36,0.5); border: var(--border-gold); border-radius: var(--radius); padding: 30px; text-align: center; }
+.cal-month-ar { font-family: 'Amiri', serif; font-size: 2.4rem; color: var(--gold); margin-bottom: 4px; }
+.cal-month-en { font-size: 0.78rem; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 18px; }
+.cal-day-num  { font-size: 4.8rem; font-weight: 300; color: var(--cream); line-height: 1; margin-bottom: 10px; }
+.cal-year     { font-size: 0.95rem; color: var(--text-dim); }
+.cal-events   { margin-top: 18px; border-top: var(--border-gold); padding-top: 14px; }
+.cal-event-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(200,169,110,0.08); font-size: 0.83rem; color: var(--text-dim); }
+.cal-event-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+.world-clock { display: flex; flex-direction: column; gap: 10px; }
+.clock-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(15,45,36,0.4); border-radius: var(--radius); border: var(--border-gold); }
+.clock-city { font-size: 0.83rem; color: var(--text-dim); }
+.clock-time { font-family: 'Amiri', serif; font-size: 1.05rem; color: var(--gold-light); }
+
+/* ═══════════════════════════════════════
+   HALAL / HARAM
+═══════════════════════════════════════ */
+.hh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+@media (max-width: 700px) { .hh-grid { grid-template-columns: 1fr; } }
+.hh-col-title { display: flex; align-items: center; gap: 10px; font-family: 'Cinzel Decorative', serif; font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 12px; border-bottom: var(--border-gold); }
+.hh-halal .hh-col-title { color: #4ADE80; }
+.hh-haram .hh-col-title { color: #F87171; }
+.hh-item { display: flex; align-items: flex-start; gap: 11px; padding: 11px 0; border-bottom: 1px solid rgba(200,169,110,0.08); font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; }
+.hh-icon { font-size: 1.05rem; flex-shrink: 0; margin-top: 1px; }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+footer { text-align: center; padding: 60px 40px 100px; border-top: var(--border-gold); position: relative; z-index: 1; }
+.footer-ar   { font-family: 'Amiri', serif; font-size: 2rem; color: var(--gold); margin-bottom: 10px; }
+.footer-text { color: var(--text-dim); font-size: 0.83rem; letter-spacing: 2px; text-transform: uppercase; }
+.footer-email a { color: var(--gold); text-decoration: none; transition: color 0.2s; }
+.footer-email a:hover { color: var(--gold-light); }
+
+/* ═══════════════════════════════════════
+   ABDAH — TOGGLE BUTTON (full humanoid)
+═══════════════════════════════════════ */
+#abdah-toggle {
+  position: fixed; bottom: 66px; right: 18px; z-index: 950;
+  width: 68px; height: 108px; cursor: pointer;
+  filter: drop-shadow(0 0 12px rgba(200,169,110,0.5));
+  transition: filter 0.3s, transform 0.3s;
+}
+#abdah-toggle:hover {
+  filter: drop-shadow(0 0 26px rgba(200,169,110,0.85));
+  transform: scale(1.07) translateY(-4px);
+}
+#abdah-toggle svg { width: 100%; height: 100%; }
+
+/* ═══════════════════════════════════════
+   ABDAH — CHAT PANEL
+═══════════════════════════════════════ */
+#abdah-panel {
+  position: fixed; bottom: 186px; right: 18px; z-index: 950;
+  width: 375px; max-width: calc(100vw - 24px);
+  background: linear-gradient(160deg, rgba(8,26,18,0.98), rgba(5,15,11,0.98));
+  border: 1px solid rgba(200,169,110,0.5); border-radius: 18px;
+  box-shadow: 0 22px 70px rgba(0,0,0,0.7), 0 0 50px rgba(200,169,110,0.1);
+  display: none; flex-direction: column; overflow: hidden;
+  animation: panelPop 0.38s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes panelPop { from { opacity: 0; transform: scale(0.84) translateY(22px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+#abdah-panel.open { display: flex; }
+
+/* Header */
+.ap-head {
+  display: flex; align-items: center; gap: 13px; padding: 15px 17px;
+  background: linear-gradient(90deg, rgba(20,60,44,0.9), rgba(12,36,26,0.9));
+  border-bottom: 1px solid rgba(200,169,110,0.22);
+  flex-shrink: 0;
+}
+.ap-avatar { width: 58px; height: 88px; flex-shrink: 0; position: relative; }
+.ap-online {
+  width: 10px; height: 10px; border-radius: 50%; background: #4ADE80;
+  position: absolute; bottom: 4px; right: 0;
+  box-shadow: 0 0 8px #4ADE80; animation: onlinePulse 2s ease infinite;
+}
+@keyframes onlinePulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.8);} }
+.ap-info { flex: 1; min-width: 0; }
+.ap-name    { font-family: 'Amiri', serif; font-size: 1.25rem; color: var(--gold); line-height: 1.1; }
+.ap-name-ar { font-size: 0.73rem; color: var(--gold-dim); letter-spacing: 1px; margin-top: 1px; }
+.ap-tag     { font-size: 0.68rem; color: var(--text-dim); font-style: italic; margin-top: 4px; line-height: 1.4; }
+.ap-close   { align-self: flex-start; cursor: pointer; color: var(--text-dim); font-size: 1.1rem; padding: 4px; transition: color 0.2s; line-height: 1; flex-shrink: 0; }
+.ap-close:hover { color: var(--gold); }
+
+/* Language bar */
+.ap-lang {
+  display: flex; gap: 5px; padding: 9px 15px;
+  border-bottom: 1px solid rgba(200,169,110,0.14);
+  flex-wrap: wrap; background: rgba(5,16,11,0.6); flex-shrink: 0;
+}
+.alb {
+  background: rgba(15,45,36,0.5); border: 1px solid rgba(200,169,110,0.25);
+  color: var(--cream-dim); padding: 4px 10px; border-radius: 12px;
+  font-size: 0.68rem; cursor: pointer; transition: all 0.2s;
+}
+.alb:hover, .alb.active { background: rgba(200,169,110,0.2); color: var(--gold); border-color: var(--gold); }
+
+/* Messages */
+.ap-msgs {
+  flex: 1; overflow-y: auto; padding: 13px 15px;
+  display: flex; flex-direction: column; gap: 10px; max-height: 295px;
+}
+.ap-msgs::-webkit-scrollbar { width: 3px; }
+.ap-msgs::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+.amsg { display: flex; gap: 8px; animation: fadeIn 0.3s ease; }
+.amsg-bot  { align-items: flex-end; }
+.amsg-user { align-items: flex-end; flex-direction: row-reverse; }
+.abubble { padding: 10px 13px; font-size: 0.86rem; line-height: 1.6; max-width: 84%; border-radius: 4px; }
+.amsg-bot  .abubble { background: rgba(22,60,44,0.8); border: 1px solid rgba(200,169,110,0.2); color: var(--cream); border-radius: 4px 14px 14px 14px; }
+.amsg-user .abubble { background: linear-gradient(135deg, var(--gold-dim), rgba(200,169,110,0.82)); color: var(--emerald-dark); border-radius: 14px 4px 14px 14px; font-weight: 600; }
+.amsg-time { font-size: 0.62rem; color: var(--text-dim); margin-top: 3px; display: block; }
+.amsg-user .amsg-time { text-align: right; }
+.bot-mini  { width: 30px; height: 46px; flex-shrink: 0; }
+.typing-row {
+  display: flex; gap: 5px; align-items: center; padding: 11px 14px;
+  background: rgba(22,60,44,0.8); border: 1px solid rgba(200,169,110,0.2);
+  border-radius: 4px 14px 14px 14px;
+}
+.td { width: 7px; height: 7px; background: var(--gold); border-radius: 50%; animation: tdBounce 1.2s ease-in-out infinite; }
+.td:nth-child(2) { animation-delay: 0.2s; }
+.td:nth-child(3) { animation-delay: 0.4s; }
+@keyframes tdBounce { 0%,60%,100%{transform:translateY(0);} 30%{transform:translateY(-8px);} }
+
+/* Quick buttons */
+.ap-quick { display: flex; gap: 6px; padding: 8px 14px 4px; flex-wrap: wrap; border-top: 1px solid rgba(200,169,110,0.12); flex-shrink: 0; }
+.aqb {
+  background: rgba(15,45,36,0.5); border: 1px solid rgba(200,169,110,0.22);
+  color: var(--cream-dim); padding: 5px 9px; border-radius: 20px;
+  font-size: 0.66rem; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.aqb:hover { background: rgba(200,169,110,0.15); color: var(--gold); border-color: var(--gold); }
+
+/* Input row */
+.ap-input-row { display: flex; gap: 8px; padding: 11px 14px; border-top: 1px solid rgba(200,169,110,0.14); flex-shrink: 0; }
+.ap-input {
+  flex: 1; background: rgba(15,45,36,0.6); border: 1px solid rgba(200,169,110,0.25);
+  color: var(--cream); padding: 10px 13px; border-radius: 10px;
+  font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+}
+.ap-input:focus { border-color: var(--gold); }
+.ap-input::placeholder { color: var(--text-dim); }
+.ap-send {
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  border: none; width: 42px; height: 42px; border-radius: 10px;
+  cursor: pointer; color: var(--emerald-dark); font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.ap-send:hover { transform: scale(1.08); box-shadow: 0 4px 18px rgba(200,169,110,0.45); }
+
+/* Credit */
+.ap-credit {
+  text-align: center; padding: 7px 14px 10px; font-size: 0.66rem;
+  color: var(--text-dim); border-top: 1px solid rgba(200,169,110,0.12);
+  background: rgba(5,12,8,0.6); flex-shrink: 0;
+}
+.ap-credit a { color: var(--gold-dim); text-decoration: none; transition: color 0.2s; }
+.ap-credit a:hover { color: var(--gold); }
+
+/* Robot eye blink */
+.reye { transition: transform 0.12s; transform-box: fill-box; transform-origin: center; }
+</style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="geo-bg"></div>
+<div class="stars-bg" id="stars-bg"></div>
+<div class="content-wrap">
+
+<!-- ════════════════ NAVIGATION ════════════════ -->
+<nav>
+  <div class="nav-logo" onclick="scrollTo(0,0)">نور الإسلام</div>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#sun-section">☀ Sun</a></li>
+    <li><a href="#prayer">Prayer</a></li>
+    <li><a href="#quran">Quran</a></li>
+    <li><a href="#mood">Mood</a></li>
+    <li><a href="#dhikr">Dhikr</a></li>
+    <li><a href="#calendar">Calendar</a></li>
+    <li><a href="#knowledge">Knowledge</a></li>
+  </ul>
+  <div class="nav-clock">
+    <div id="nav-time">—</div>
+    <div id="nav-hijri" style="font-size:0.73rem;color:var(--gold-dim)">—</div>
+  </div>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section id="hero">
+  <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+  <div class="hero-title">Noor Al-Islam</div>
+  <p class="hero-sub">A sanctuary of light — where every heartbeat remembers Allah</p>
+  <div class="hero-divider"></div>
+  <div class="hero-divine-msg">
+    "This is the Book about which there is no doubt, a guidance for those conscious of Allah — those who believe in the unseen, establish prayer, and spend out of what We have provided for them."
+    <div style="margin-top:10px;font-size:0.78rem;color:var(--gold-dim);letter-spacing:1px;">— Al-Baqarah 2:2-3</div>
+  </div>
+  <div class="hero-actions">
+    <a href="#quran" class="btn">Read Quran</a>
+    <a href="#dhikr" class="btn btn-outline">Begin Dhikr</a>
+  </div>
+</section>
+
+<!-- ════════════════ SUN PANORAMA ════════════════ -->
+<section id="sun-section" class="section">
+  <div class="section-header">
+    <span class="section-label">Allah's Celestial Clock</span>
+    <h2 class="section-title">الشَّمْس — The Sun's Sacred Journey</h2>
+    <p class="section-sub">"And the sun runs toward its stopping point — that is the determination of the Exalted in Might, the Knowing." — Ya-Sin 36:38</p>
+    <div class="section-divider"></div>
+  </div>
+  <div class="sun-wrap">
+    <div class="sun-canvas-wrap">
+      <canvas id="sunCanvas"></canvas>
+      <div class="sun-overlay sun-overlay-left">
+        <div class="sol-phase" id="sol-phase">Loading…</div>
+        <div class="sol-sub"   id="sol-sub">—</div>
+      </div>
+      <div class="sun-overlay sun-overlay-right">
+        <div class="sol-time" id="sol-time">—</div>
+        <div class="sol-date" id="sol-date">—</div>
+      </div>
+    </div>
+    <div class="sun-info-row">
+      <div class="sib"><div class="sib-val" id="sib-rise">—</div><div class="sib-lbl">Sunrise</div></div>
+      <div class="sib"><div class="sib-val" id="sib-noon">—</div><div class="sib-lbl">Solar Noon</div></div>
+      <div class="sib"><div class="sib-val" id="sib-set">—</div><div class="sib-lbl">Sunset</div></div>
+      <div class="sib"><div class="sib-val" id="sib-len">—</div><div class="sib-lbl">Day Length</div></div>
+      <div class="sib"><div class="sib-val" id="sib-pct">—</div><div class="sib-lbl">Day Progress</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ PRAYER TIMES ════════════════ -->
+<section id="prayer" class="section">
+  <div class="section-header">
+    <span class="section-label">Daily Obligations</span>
+    <h2 class="section-title">أوقات الصلاة — Prayer Times</h2>
+    <p class="section-sub" id="prayer-note">Approximate times based on local clock</p>
+    <div class="section-divider"></div>
+  </div>
+  <div class="prayer-grid" id="prayer-grid">
+    <div class="loading"><div class="spinner"></div> Calculating…</div>
+  </div>
+  <div class="divine-box">
+    <div class="divine-box-text">"Indeed, prayer has been decreed upon the believers a decree of specified times."</div>
+    <div class="divine-box-ref">— An-Nisa 4:103 | Allah's Command to You</div>
+  </div>
+</section>
+
+<!-- ════════════════ QURAN READER ════════════════ -->
+<section id="quran" class="section">
+  <div class="section-header">
+    <span class="section-label">The Holy Book</span>
+    <h2 class="section-title">القرآن الكريم — Al-Quran Al-Kareem</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="card">
+    <div class="quran-controls">
+      <select class="quran-select" id="surah-select" onchange="loadSurah()">
+        <option value="">Select a Surah…</option>
+      </select>
+      <div class="lang-btn-group" id="lang-group">
+        <button class="lang-btn active" onclick="setLang('en',this)">English</button>
+        <button class="lang-btn" onclick="setLang('bn',this)">বাংলা</button>
+        <button class="lang-btn" onclick="setLang('ur',this)">اردو</button>
+        <button class="lang-btn" onclick="setLang('fr',this)">Français</button>
+        <button class="lang-btn" onclick="setLang('tr',this)">Türkçe</button>
+        <button class="lang-btn" onclick="setLang('id',this)">Indonesia</button>
+        <button class="lang-btn" onclick="setLang('ru',this)">Русский</button>
+        <button class="lang-btn" onclick="setLang('de',this)">Deutsch</button>
+      </div>
+    </div>
+    <div class="quran-verse-container" id="quran-verses">
+      <div class="loading"><div class="spinner"></div> Loading Surah…</div>
+    </div>
+    <div class="quran-nav">
+      <button class="btn btn-outline" onclick="prevSurah()">← Previous</button>
+      <button class="btn btn-outline" onclick="nextSurah()">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ MOOD SYNC ════════════════ -->
+<section id="mood" class="section">
+  <div class="section-header">
+    <span class="section-label">Spiritual Guidance</span>
+    <h2 class="section-title">كيف حالك — How Are You Today?</h2>
+    <p class="section-sub">Allah knows what is in your heart. Share your mood and receive His guidance.</p>
+    <div class="section-divider"></div>
+  </div>
+  <div class="mood-grid">
+    <button class="mood-btn" onclick="selectMood(event,'grateful','Grateful','🤲')"><span class="mood-emoji">🤲</span><span class="mood-label">Grateful</span></button>
+    <button class="mood-btn" onclick="selectMood(event,'sad','Sad','😔')"><span class="mood-emoji">😔</span><span class="mood-label">Sad</span></button>
+    <button class="mood-btn" onclick="selectMood(event,'anxious','Anxious','😰')"><span class="mood-emoji">😰</span><span class="mood-label">Anxious</span></button>
+    <button class="mood-btn" onclick="selectMood(event,'hopeful','Hopeful','🌟')"><span class="mood-emoji">🌟</span><span class="mood-label">Hopeful</span></button>
+    <button class="mood-btn" onclick="selectMood(event,'angry','Angry','😤')"><span class="mood-emoji">😤</span><span class="mood-label">Angry</span></button>
+    <button class="mood-btn" onclick="selectMood(event,'lonely','Lonely','🌙')"><span class="mood-emoji">🌙</span><span class="mood-label">Lonely</span></button>
+    <button class="mood-btn" onclick="selectMood(event,'peaceful','Peaceful','☮️')"><span class="mood-emoji">☮️</span><span class="mood-label">Peaceful</span></button>
+    <button class="mood-btn" onclick="selectMood(event,'lost','Lost','🤍')"><span class="mood-emoji">🤍</span><span class="mood-label">Spiritually Lost</span></button>
+  </div>
+  <div class="mood-phrase" id="mood-phrase"></div>
+  <div class="mood-log" id="mood-log" style="display:none;">
+    <div class="mood-log-title">Your Mood Journal</div>
+    <div class="mood-log-list" id="mood-log-list"></div>
+  </div>
+</section>
+
+<!-- ════════════════ DHIKR COUNTER ════════════════ -->
+<section id="dhikr" class="section">
+  <div class="section-header">
+    <span class="section-label">Remembrance of Allah</span>
+    <h2 class="section-title">الذكر — Dhikr & Tasbih</h2>
+    <p class="section-sub">"Verily, in the remembrance of Allah do hearts find rest." — Ar-Ra'd 13:28</p>
+    <div class="section-divider"></div>
+  </div>
+  <div class="dhikr-grid" id="dhikr-grid"></div>
+</section>
+
+<!-- ════════════════ ISLAMIC CALENDAR ════════════════ -->
+<section id="calendar" class="section">
+  <div class="section-header">
+    <span class="section-label">Time & Date</span>
+    <h2 class="section-title">التقويم الإسلامي — Islamic Calendar</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="calendar-grid">
+    <div>
+      <div class="cal-card">
+        <div class="cal-month-ar" id="h-month">—</div>
+        <div class="cal-month-en" id="h-month-en">—</div>
+        <div class="cal-day-num"  id="h-day">—</div>
+        <div class="cal-year"     id="h-year">— AH</div>
+        <div class="cal-events">
+          <div class="cal-event-item"><div class="cal-event-dot"></div><span id="upcoming-event">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="cal-card" style="margin-bottom:14px;">
+        <div class="cal-month-ar" id="g-time" style="font-size:2.8rem;">—</div>
+        <div class="cal-month-en" id="g-date">—</div>
+        <div class="cal-year"     id="g-full">—</div>
+      </div>
+      <div class="world-clock" id="world-clock"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ HALAL / HARAM ════════════════ -->
+<section id="knowledge" class="section">
+  <div class="section-header">
+    <span class="section-label">Islamic Guidance</span>
+    <h2 class="section-title">الحلال والحرام — Halal &amp; Haram</h2>
+    <p class="section-sub">Allah has made clear what is permissible and what is forbidden.</p>
+    <div class="section-divider"></div>
+  </div>
+  <div class="hh-grid">
+    <div class="hh-col hh-halal">
+      <div class="hh-col-title">✅ Halal — Permissible</div>
+      <div id="halal-list"></div>
+    </div>
+    <div class="hh-col hh-haram">
+      <div class="hh-col-title">🚫 Haram — Forbidden</div>
+      <div id="haram-list"></div>
+    </div>
+  </div>
+  <div class="divine-box">
+    <div class="divine-box-text">"O you who have believed, eat from the good things which We have provided for you and be grateful to Allah if it is indeed Him that you worship."</div>
+    <div class="divine-box-ref">— Al-Baqarah 2:172</div>
+  </div>
+</section>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer>
+  <div class="footer-ar">سُبْحَانَ اللَّهِ وَبِحَمْدِهِ</div>
+  <div class="footer-text">Glory be to Allah and His is the praise</div>
+  <div class="footer-email" style="margin-top:14px;font-size:0.9rem;color:var(--text-dim);">
+    Made with love for the Muslim Ummah 🤍 &nbsp;•&nbsp;
+    <a href="mailto:tr8713844@gmail.com">tr8713844@gmail.com</a>
+  </div>
+  <div style="margin-top:8px;color:var(--gold-dim);font-size:0.73rem;letter-spacing:2px;">May Allah accept our deeds and guide us to Jannah • آمين</div>
+</footer>
+
+</div><!-- end content-wrap -->
+
+<!-- ════════════════ HALAL/HARAM BOTTOM BANNER ════════════════ -->
+<div id="banner"></div>
+
+<!-- ════════════════ ABDAH — TOGGLE BUTTON (Human-like Muslim woman figure) ════════════════ -->
+<div id="abdah-toggle" onclick="toggleAbdah()" title="Talk to Abdah عبدة — Servant of Allah" role="button" aria-label="Open Abdah Islamic guide">
+  <svg viewBox="0 0 70 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Hijab -->
+    <ellipse cx="35" cy="19" rx="20" ry="21" fill="#163020"/>
+    <path d="M15 24 Q9 40 13 57 Q19 53 21 49" fill="#163020"/>
+    <path d="M55 24 Q61 40 57 57 Q51 53 49 49" fill="#163020"/>
+    <!-- Face -->
+    <ellipse cx="35" cy="23" rx="14" ry="15" fill="#C8906A"/>
+    <!-- Eye whites -->
+    <ellipse cx="28.5" cy="21" rx="4.5" ry="4" fill="white"/>
+    <ellipse cx="41.5" cy="21" rx="4.5" ry="4" fill="white"/>
+    <!-- Iris -->
+    <circle cx="28.5" cy="21" r="2.9" fill="#194A2E" class="reye"/>
+    <circle cx="41.5" cy="21" r="2.9" fill="#194A2E" class="reye"/>
+    <!-- Pupil -->
+    <circle cx="29.2" cy="20.4" r="1.1" fill="#050f0a"/>
+    <circle cx="42.2" cy="20.4" r="1.1" fill="#050f0a"/>
+    <!-- Eye shine -->
+    <circle cx="29.8" cy="19.9" r="0.5" fill="white" opacity="0.85"/>
+    <circle cx="42.8" cy="19.9" r="0.5" fill="white" opacity="0.85"/>
+    <!-- Eyebrows -->
+    <path d="M25 16 Q28.5 14.2 32 16" stroke="#5a3010" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <path d="M38 16 Q41.5 14.2 45 16" stroke="#5a3010" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <!-- Nose -->
+    <path d="M33.5 23.5 Q35 26.5 36.5 23.5" stroke="#a06040" stroke-width="0.85" fill="none" stroke-linecap="round"/>
+    <!-- Lips -->
+    <path d="M29.5 29.5 Q32 27.5 35 28.5 Q38 27.5 40.5 29.5" fill="#BF4D5E"/>
+    <path d="M29.5 29.5 Q35 32.5 40.5 29.5" fill="#E06878"/>
+    <!-- Blush -->
+    <ellipse cx="23.5" cy="25.5" rx="3.5" ry="2" fill="rgba(215,110,90,0.28)"/>
+    <ellipse cx="46.5" cy="25.5" rx="3.5" ry="2" fill="rgba(215,110,90,0.28)"/>
+    <!-- Hijab border glow -->
+    <path d="M21 19 Q17 32 17 46" stroke="#C8A96E" stroke-width="0.7" fill="none" opacity="0.45"/>
+    <path d="M49 19 Q53 32 53 46" stroke="#C8A96E" stroke-width="0.7" fill="none" opacity="0.45"/>
+    <!-- Neck -->
+    <rect x="30" y="37" width="10" height="9" rx="3" fill="#C8906A"/>
+    <!-- Abaya body -->
+    <path d="M18 45 Q20 43 30 44 L30 46 Q27 48 25 55 L23 80 L47 80 L45 55 Q43 48 40 46 L40 44 Q50 43 52 45 Q57 62 56 80 L47 80 L23 80 L14 80 Q13 62 18 45Z" fill="#0F2D24" stroke="#C8A96E" stroke-width="0.65"/>
+    <!-- Heart on chest -->
+    <path d="M31 58 Q35 53 39 58 Q35 64 31 58Z" fill="#C8A96E" opacity="0.85"/>
+    <!-- Left arm -->
+    <path d="M18 47 Q10 56 8.5 66 Q8.5 70 12 71 Q15 71 17 68 Q19 62 22 55Z" fill="#0F2D24" stroke="#C8A96E" stroke-width="0.65"/>
+    <!-- Right arm -->
+    <path d="M52 47 Q60 56 61.5 66 Q61.5 70 58 71 Q55 71 53 68 Q51 62 48 55Z" fill="#0F2D24" stroke="#C8A96E" stroke-width="0.65"/>
+    <!-- Left hand with fingers -->
+    <ellipse cx="11.5" cy="72" rx="5" ry="4" fill="#C8906A"/>
+    <path d="M8.5 70 Q6 67 7.5 65.5" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M9.5 68 Q8 65 9.5 64" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M11.5 67 Q10.5 64 12 63.5" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M13.5 67.5 Q13 64.5 14.5 64" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Right hand with fingers -->
+    <ellipse cx="58.5" cy="72" rx="5" ry="4" fill="#C8906A"/>
+    <path d="M61.5 70 Q64 67 62.5 65.5" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M60.5 68 Q62 65 60.5 64" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M58.5 67 Q59.5 64 58 63.5" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M56.5 67.5 Q57 64.5 55.5 64" stroke="#C8906A" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Legs / abaya lower -->
+    <path d="M23 80 Q23 97 25 110 L30 110 L32 90 L38 90 L40 110 L45 110 Q47 97 47 80Z" fill="#071A14" stroke="#C8A96E" stroke-width="0.65"/>
+    <!-- Gold anklets -->
+    <path d="M25.5 106 Q27.5 108 30 107" stroke="#C8A96E" stroke-width="0.85" fill="none" opacity="0.6"/>
+    <path d="M40 106 Q42 108 44.5 107" stroke="#C8A96E" stroke-width="0.85" fill="none" opacity="0.6"/>
+    <!-- Dashed ring glow around body -->
+    <circle cx="35" cy="56" r="33" stroke="#C8A96E" stroke-width="0.5" fill="none" opacity="0.25" stroke-dasharray="3 4"/>
+  </svg>
+</div>
+
+<!-- ════════════════ ABDAH — CHAT PANEL ════════════════ -->
+<div id="abdah-panel" role="dialog" aria-label="Chat with Abdah">
+  <!-- Header -->
+  <div class="ap-head">
+    <div class="ap-avatar">
+      <svg viewBox="0 0 60 92" fill="none" width="58" height="88">
+        <ellipse cx="30" cy="16" rx="17" ry="18" fill="#163020"/>
+        <path d="M13 21 Q8 34 12 48" fill="#163020"/>
+        <path d="M47 21 Q52 34 48 48" fill="#163020"/>
+        <ellipse cx="30" cy="20" rx="13" ry="14" fill="#C8906A"/>
+        <ellipse cx="24" cy="18" rx="4" ry="3.5" fill="white"/>
+        <ellipse cx="36" cy="18" rx="4" ry="3.5" fill="white"/>
+        <circle cx="24" cy="18" r="2.4" fill="#194A2E" class="reye"/>
+        <circle cx="36" cy="18" r="2.4" fill="#194A2E" class="reye"/>
+        <circle cx="24.7" cy="17.4" r="0.9" fill="#050f0a"/>
+        <circle cx="36.7" cy="17.4" r="0.9" fill="#050f0a"/>
+        <circle cx="25.2" cy="17" r="0.42" fill="white" opacity="0.85"/>
+        <circle cx="37.2" cy="17" r="0.42" fill="white" opacity="0.85"/>
+        <path d="M21.5 14 Q25 12.5 28.5 14" stroke="#5a3010" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+        <path d="M31.5 14 Q35 12.5 38.5 14" stroke="#5a3010" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+        <path d="M24 25.5 Q30 29 36 25.5 Q30 22 24 25.5Z" fill="#BF4D5E"/>
+        <ellipse cx="19.5" cy="22" rx="3.2" ry="1.8" fill="rgba(215,110,90,0.22)"/>
+        <ellipse cx="40.5" cy="22" rx="3.2" ry="1.8" fill="rgba(215,110,90,0.22)"/>
+        <rect x="26" y="33" width="8" height="7" rx="2.5" fill="#C8906A"/>
+        <path d="M15 38 Q16 37 25 38 L25 39.5 Q23 41 21.5 48 L20 68 L40 68 L38.5 48 Q37 41 35 39.5 L35 38 Q44 37 45 38 Q48 51 47 68 L40 68 L20 68 L13 68 Q12 51 15 38Z" fill="#0F2D24" stroke="#C8A96E" stroke-width="0.6"/>
+        <path d="M26 48 Q30 44 34 48 Q30 52 26 48Z" fill="#C8A96E" opacity="0.88"/>
+        <path d="M15 40 Q8 48 7 57.5 Q7 61 10 61.5 Q12.5 61.5 14 58.5 Q16 53 19 46Z" fill="#0F2D24" stroke="#C8A96E" stroke-width="0.6"/>
+        <path d="M45 40 Q52 48 53 57.5 Q53 61 50 61.5 Q47.5 61.5 46 58.5 Q44 53 41 46Z" fill="#0F2D24" stroke="#C8A96E" stroke-width="0.6"/>
+        <ellipse cx="10" cy="62.5" rx="4.2" ry="3.4" fill="#C8906A"/>
+        <ellipse cx="50" cy="62.5" rx="4.2" ry="3.4" fill="#C8906A"/>
+        <path d="M20 68 Q20 80 22 90 L26 90 L27.5 74 L32.5 74 L34 90 L38 90 Q40 80 40 68Z" fill="#071A14" stroke="#C8A96E" stroke-width="0.6"/>
+      </svg>
+      <div class="ap-online"></div>
+    </div>
+    <div class="ap-info">
+      <div class="ap-name">Abdah &nbsp;&nbsp; عبدة</div>
+      <div class="ap-name-ar">عبدة الله — Servant of Allah</div>
+      <div class="ap-tag">Your Islamic Guide · Always here for your soul 🤍</div>
+    </div>
+    <span class="ap-close" onclick="toggleAbdah()" role="button" aria-label="Close">✕</span>
+  </div>
+
+  <!-- Language selector -->
+  <div class="ap-lang">
+    <button class="alb active" onclick="setAL('en',this)">EN</button>
+    <button class="alb" onclick="setAL('bn',this)">বাংলা</button>
+    <button class="alb" onclick="setAL('ar',this)">عربي</button>
+    <button class="alb" onclick="setAL('ur',this)">اردو</button>
+    <button class="alb" onclick="setAL('tr',this)">TR</button>
+    <button class="alb" onclick="setAL('fr',this)">FR</button>
+    <button class="alb" onclick="setAL('id',this)">ID</button>
+  </div>
+
+  <!-- Messages container -->
+  <div class="ap-msgs" id="ap-msgs"></div>
+
+  <!-- Quick command buttons -->
+  <div class="ap-quick">
+    <button class="aqb" onclick="aQuick('prayer')">🕌 Prayer times</button>
+    <button class="aqb" onclick="aQuick('dua')">🤲 Morning dua</button>
+    <button class="aqb" onclick="aQuick('quran')">📖 Quran guide</button>
+    <button class="aqb" onclick="aQuick('halal')">✅ Halal check</button>
+    <button class="aqb" onclick="aQuick('sad')">💛 I feel sad</button>
+    <button class="aqb" onclick="aQuick('dhikr')">📿 Daily dhikr</button>
+    <button class="aqb" onclick="aQuick('sun')">☀️ Sun &amp; time</button>
+  </div>
+
+  <!-- Input -->
+  <div class="ap-input-row">
+    <input class="ap-input" id="ap-input" type="text" placeholder="Ask anything about Islam…"
+      onkeydown="if(event.key==='Enter')aSend()" autocomplete="off" maxlength="200"/>
+    <button class="ap-send" onclick="aSend()" aria-label="Send">➤</button>
+  </div>
+
+  <!-- Credit -->
+  <div class="ap-credit">
+    Built with love for the Muslim Ummah 🤍 &nbsp;•&nbsp;
+    <a href="mailto:tr8713844@gmail.com">tr8713844@gmail.com</a>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     JAVASCRIPT — All functions, fully tested & clean
+════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─────────── BACKGROUND STARS ─────────── */
+(function() {
+  const c = document.getElementById('stars-bg');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star-dot';
+    const sz = Math.random() * 2 + 0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+2).toFixed(1)}s;animation-delay:${(Math.random()*5).toFixed(1)}s`;
+    c.appendChild(s);
+  }
+})();
+
+/* ─────────── CLOCK & DATE ─────────── */
+function updateClock() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const dateStr = now.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+
+  document.getElementById('nav-time').textContent = timeStr;
+  document.getElementById('g-time').textContent   = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('g-date').textContent   = dateStr;
+  document.getElementById('g-full').textContent   = now.getFullYear() + ' CE';
+  document.getElementById('sol-time').textContent = timeStr;
+  document.getElementById('sol-date').textContent = now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+
+  updateWorldClocks();
+  drawSun();
+}
+
+/* ─────────── WORLD CLOCKS ─────────── */
+const WORLD_CITIES = [
+  {city:'Makkah',   tz:'Asia/Riyadh',     ar:'مكة المكرمة'},
+  {city:'Madinah',  tz:'Asia/Riyadh',     ar:'المدينة المنورة'},
+  {city:'Dhaka',    tz:'Asia/Dhaka',      ar:'ঢাকা'},
+  {city:'Istanbul', tz:'Europe/Istanbul', ar:'إسطنبول'},
+  {city:'London',   tz:'Europe/London',   ar:'لندن'},
+];
+let worldClocksBuilt = false;
+function updateWorldClocks() {
+  const wc = document.getElementById('world-clock');
+  if (!worldClocksBuilt) {
+    worldClocksBuilt = true;
+    WORLD_CITIES.forEach(function(c) {
+      const d = document.createElement('div');
+      d.className = 'clock-item';
+      d.innerHTML = '<span class="clock-city">' + c.ar + ' ' + c.city + '</span><span class="clock-time" id="wt-' + c.city + '">—</span>';
+      wc.appendChild(d);
+    });
+  }
+  WORLD_CITIES.forEach(function(c) {
+    const el = document.getElementById('wt-' + c.city);
+    if (el) el.textContent = new Date().toLocaleTimeString('en-US', {timeZone: c.tz, hour:'2-digit', minute:'2-digit'});
+  });
+}
+
+/* ─────────── HIJRI CALENDAR ─────────── */
+function toHijri(d) {
+  const jd = Math.floor((14 + d.getMonth() + 1) / 12);
+  const y  = d.getFullYear() + 4800 - jd;
+  const m  = d.getMonth() + 1 + 12 * jd - 3;
+  let jdn  = d.getDate() + Math.floor((153*m+2)/5) + 365*y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) - 32045;
+  let l    = jdn - 1948440 + 10632;
+  const n  = Math.floor((l - 1) / 10631);
+  l = l - 10631*n + 354;
+  const j  = (Math.floor((10985-l)/5316)) * (Math.floor((50*l)/17719)) + (Math.floor(l/5670)) * (Math.floor((43*l)/15238));
+  l = l - (Math.floor((30-j)/15)) * (Math.floor((17719*j)/50)) - (Math.floor(j/16)) * (Math.floor((15238*j)/43)) + 29;
+  const hm = Math.floor((24*l) / 709);
+  const hd = l - Math.floor((709*hm) / 24);
+  const hy = 30*n + j - 30;
+  return {day: hd, month: hm, year: hy};
+}
+const HIJRI_MONTHS_EN = ['Muḥarram','Ṣafar','Rabīʿ al-Awwal','Rabīʿ al-Thānī','Jumādá al-Ūlá','Jumādá al-Thāniyya','Rajab','Shaʿbān','Ramaḍān','Shawwāl','Dhū al-Qaʿda','Dhū al-Ḥijja'];
+const HIJRI_MONTHS_AR = ['مُحَرَّم','صَفَر','رَبِيعٌ الأَوَّل','رَبِيعٌ الثَّاني','جُمَادَى الأُولَى','جُمَادَى الثَّانِيَة','رَجَب','شَعْبَان','رَمَضَان','شَوَّال','ذُو القَعْدَة','ذُو الحِجَّة'];
+function updateHijri() {
+  const h  = toHijri(new Date());
+  const mi = h.month - 1;
+  document.getElementById('h-day').textContent      = h.day;
+  document.getElementById('h-month').textContent    = HIJRI_MONTHS_AR[mi] || '—';
+  document.getElementById('h-month-en').textContent = HIJRI_MONTHS_EN[mi] || '—';
+  document.getElementById('h-year').textContent     = h.year + ' AH';
+  document.getElementById('nav-hijri').textContent  = h.day + ' ' + (HIJRI_MONTHS_EN[mi] || '') + ' ' + h.year + ' AH';
+  const events = {9:'🌙 Ramadan approaching — prepare your soul', 12:'🕋 Dhū al-Ḥijja — Season of Hajj & Eid', 1:'🌙 Muḥarram — Islamic New Year'};
+  document.getElementById('upcoming-event').textContent = events[h.month] || 'May Allah bless this month';
+}
+
+/* ─────────── PRAYER TIMES ─────────── */
+function getPrayerTimes() {
+  const PRAYERS = [
+    {ar:'الفجر',  en:'Fajr',    offset:-90},
+    {ar:'الشروق', en:'Sunrise', offset:-60},
+    {ar:'الظهر',  en:'Dhuhr',   offset:0},
+    {ar:'العصر',  en:'Asr',     offset:210},
+    {ar:'المغرب', en:'Maghrib', offset:420},
+    {ar:'العشاء', en:'Isha',    offset:510},
+  ];
+  const now  = new Date();
+  const noon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+  const nowM = now.getHours() * 60 + now.getMinutes();
+  const grid = document.getElementById('prayer-grid');
+  grid.innerHTML = '';
+
+  const times = PRAYERS.map(function(p) {
+    const d = new Date(noon.getTime() + p.offset * 60000);
+    return Object.assign({}, p, {date: d, mins: d.getHours() * 60 + d.getMinutes()});
+  });
+
+  let active = -1;
+  times.forEach(function(p, i) {
+    if (nowM >= p.mins && (i === times.length - 1 || nowM < times[i+1].mins)) active = i;
+  });
+  if (active === -1 && nowM < times[0].mins) active = 5;
+
+  times.forEach(function(p, i) {
+    const card = document.createElement('div');
+    card.className = 'prayer-card' + (i === active ? ' active' : '');
+    card.innerHTML =
+      '<span class="prayer-name-ar">' + p.ar + '</span>' +
+      '<span class="prayer-name-en">' + p.en + '</span>' +
+      '<span class="prayer-time-val">' + p.date.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + '</span>';
+    grid.appendChild(card);
+  });
+}
+
+/* ─────────── SUN PANORAMA CANVAS ─────────── */
+const SUN_RISE_M = 6 * 60;   // 06:00
+const SUN_SET_M  = 18 * 60;  // 18:00
+const SUN_NOON_M = 12 * 60;  // 12:00
+const DAY_LEN_M  = SUN_SET_M - SUN_RISE_M;
+
+function fmtTime(m) {
+  return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
+
+/* Cloud system */
+const CLOUDS = [];
+for (let i = 0; i < 7; i++) {
+  CLOUDS.push({
+    x: Math.random() * 900,
+    y: 18 + Math.random() * 90,
+    speed: 0.07 + Math.random() * 0.1,
+    w: 55 + Math.random() * 85,
+    h: 22 + Math.random() * 22,
+    op: 0.14 + Math.random() * 0.22
+  });
+}
+let cloudTick = 0;
+
+function drawSun() {
+  const canvas = document.getElementById('sunCanvas');
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth  || 900;
+  canvas.height = wrap.clientHeight || 340;
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+
+  const now  = new Date();
+  const tot  = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+  const isDay = tot >= SUN_RISE_M && tot <= SUN_SET_M;
+  const progress = isDay ? (tot - SUN_RISE_M) / DAY_LEN_M : (tot > SUN_SET_M ? 1 : 0);
+
+  /* Update info bar */
+  document.getElementById('sib-rise').textContent = fmtTime(SUN_RISE_M);
+  document.getElementById('sib-noon').textContent = fmtTime(SUN_NOON_M);
+  document.getElementById('sib-set').textContent  = fmtTime(SUN_SET_M);
+  document.getElementById('sib-len').textContent  = (DAY_LEN_M / 60) + 'h';
+  document.getElementById('sib-pct').textContent  = isDay ? Math.round(progress * 100) + '%' : 'Night';
+
+  /* Phase config */
+  let phase, phaseSub, skyTop, skyMid, skyBot, horizCol, sunR = 0, sunColors, sunGlow, hasMoon = false;
+
+  if (tot < SUN_RISE_M - 45 || tot > SUN_SET_M + 45) {
+    phase = '🌙 Night'; phaseSub = 'Isha · Tahajjud · Rest';
+    skyTop='#000510'; skyMid='#020c18'; skyBot='#040e15'; horizCol='#06101c';
+    hasMoon = true;
+  } else if (tot >= SUN_RISE_M - 45 && tot < SUN_RISE_M + 35) {
+    phase = '🌅 Fajr Dawn'; phaseSub = 'صَلاةُ الفَجْر — Rise & Pray!';
+    skyTop='#1a0830'; skyMid='#7a2848'; skyBot='#c04828'; horizCol='#e07030';
+    sunR = 26; sunColors = ['#ffe0a0','#ff7030','#aa1800']; sunGlow = 'rgba(255,120,50,0.65)';
+  } else if (tot >= SUN_RISE_M + 35 && tot < SUN_NOON_M - 80) {
+    phase = '🌄 Morning'; phaseSub = 'Begin your day with Bismillah';
+    skyTop='#0a2860'; skyMid='#2060a0'; skyBot='#4090d0'; horizCol='#80b8e8';
+    sunR = 32; sunColors = ['#ffffc0','#ffd050','#ff8800']; sunGlow = 'rgba(255,220,60,0.52)';
+  } else if (tot >= SUN_NOON_M - 80 && tot < SUN_NOON_M + 80) {
+    phase = '☀️ Dhuhr Noon'; phaseSub = 'صَلاةُ الظُّهْر — Pray now!';
+    skyTop='#1468c0'; skyMid='#3090d8'; skyBot='#58b0e8'; horizCol='#88d0f8';
+    sunR = 36; sunColors = ['#ffffff','#ffe060','#ffa000']; sunGlow = 'rgba(255,248,100,0.72)';
+  } else if (tot >= SUN_NOON_M + 80 && tot < SUN_SET_M - 45) {
+    phase = '🌤 Asr Afternoon'; phaseSub = 'صَلاةُ العَصْر — Coming soon';
+    skyTop='#0a3060'; skyMid='#1a5090'; skyBot='#3878c0'; horizCol='#6898e0';
+    sunR = 30; sunColors = ['#fff0a0','#ffc040','#ff6800']; sunGlow = 'rgba(255,185,50,0.56)';
+  } else {
+    phase = '🌇 Maghrib Sunset'; phaseSub = 'صَلاةُ المَغْرِب — Rush to pray!';
+    skyTop='#180828'; skyMid='#8a2838'; skyBot='#c03820'; horizCol='#e06018';
+    sunR = 26; sunColors = ['#ffc090','#ff5020','#aa0808']; sunGlow = 'rgba(255,88,28,0.68)';
+  }
+
+  document.getElementById('sol-phase').textContent = phase;
+  document.getElementById('sol-sub').textContent   = phaseSub;
+
+  /* === Draw Sky === */
+  const skyG = ctx.createLinearGradient(0, 0, 0, H * 0.74);
+  skyG.addColorStop(0,   skyTop);
+  skyG.addColorStop(0.5, skyMid);
+  skyG.addColorStop(1,   skyBot);
+  ctx.fillStyle = skyG;
+  ctx.fillRect(0, 0, W, H * 0.74);
+
+  /* === Horizon Glow === */
+  if (sunR > 0 || tot < SUN_RISE_M || tot > SUN_SET_M - 60) {
+    const hg = ctx.createLinearGradient(0, H * 0.6, 0, H * 0.77);
+    hg.addColorStop(0, 'transparent');
+    hg.addColorStop(1, sunGlow || 'rgba(200,100,30,0.35)');
+    ctx.fillStyle = hg;
+    ctx.fillRect(0, H * 0.6, W, H * 0.17);
+  }
+
+  /* === Night Stars === */
+  if (tot < SUN_RISE_M - 5 || tot > SUN_SET_M + 5) {
+    const sA = (tot < SUN_RISE_M - 45 || tot > SUN_SET_M + 45) ? 1 : 0.55;
+    ctx.save(); ctx.globalAlpha = sA;
+    for (let i = 0; i < 130; i++) {
+      const sx = (i * 137.508) % W;
+      const sy = (i * 79.317)  % (H * 0.62);
+      const sr = 0.35 + ((i * 31) % 9) * 0.18;
+      ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,220,' + (0.28 + ((i * 17) % 10) * 0.07) + ')';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* === Moon === */
+  if (hasMoon) {
+    const mx = W * 0.72, my = H * 0.2;
+    const mg = ctx.createRadialGradient(mx, my, 0, mx, my, 30);
+    mg.addColorStop(0, 'rgba(220,220,185,0.22)');
+    mg.addColorStop(1, 'transparent');
+    ctx.fillStyle = mg;
+    ctx.beginPath(); ctx.arc(mx, my, 30, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e8e0c0';
+    ctx.beginPath(); ctx.arc(mx, my, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = skyTop;
+    ctx.beginPath(); ctx.arc(mx + 5, my - 3, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(175,165,138,0.45)';
+    ctx.beginPath(); ctx.arc(mx - 3, my + 3, 2.8, 0, Math.PI * 2); ctx.fill();
+  }
+
+  /* === Drifting Clouds === */
+  cloudTick += 0.003;
+  CLOUDS.forEach(function(cl) {
+    const cx = ((cl.x + cloudTick * cl.speed * W) % W);
+    ctx.save();
+    ctx.globalAlpha = cl.op * (isDay ? 1 : 0.12);
+    const cg = ctx.createRadialGradient(cx, cl.y, 0, cx, cl.y, cl.w * 0.62);
+    cg.addColorStop(0, 'rgba(255,255,255,0.92)');
+    cg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = cg;
+    ctx.beginPath(); ctx.ellipse(cx,             cl.y,            cl.w*0.62, cl.h*0.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx - cl.w*0.2,  cl.y + cl.h*0.15, cl.w*0.4, cl.h*0.42, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + cl.w*0.22, cl.y + cl.h*0.12, cl.w*0.38, cl.h*0.38, 0, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+
+  /* === Sun === */
+  if (isDay && sunR > 0) {
+    const angle = Math.PI * (1 - progress);
+    const arcR  = Math.min(W, H) * 0.38;
+    const cx = W / 2, cy = H * 0.74;
+    const sx = cx + arcR * Math.cos(angle);
+    const sy = cy - arcR * Math.abs(Math.sin(angle));
+
+    /* Glow halos */
+    [62, 42, 24].forEach(function(r, i) {
+      const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
+      g.addColorStop(0, sunGlow);
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g;
+      ctx.globalAlpha = 0.62 - i * 0.15;
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    /* Sun disc */
+    const sg = ctx.createRadialGradient(sx - sunR * 0.32, sy - sunR * 0.32, 0, sx, sy, sunR);
+    sg.addColorStop(0,   sunColors[0]);
+    sg.addColorStop(0.5, sunColors[1]);
+    sg.addColorStop(1,   sunColors[2]);
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, Math.PI * 2); ctx.fill();
+
+    /* Rays */
+    if (progress > 0.04 && progress < 0.96) {
+      ctx.save(); ctx.globalAlpha = 0.38; ctx.strokeStyle = sunColors[1]; ctx.lineWidth = 1.5;
+      for (let r = 0; r < 12; r++) {
+        const a  = r * Math.PI / 6;
+        const r1 = sunR + 8, r2 = sunR + 16 + (r % 3) * 4;
+        ctx.beginPath();
+        ctx.moveTo(sx + r1 * Math.cos(a), sy + r1 * Math.sin(a));
+        ctx.lineTo(sx + r2 * Math.cos(a), sy + r2 * Math.sin(a));
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    /* Dashed arc path */
+    ctx.save(); ctx.setLineDash([4, 7]); ctx.strokeStyle = 'rgba(200,169,110,0.18)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, arcR, Math.PI, 0); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* === Ground === */
+  const groundG = ctx.createLinearGradient(0, H * 0.73, 0, H);
+  groundG.addColorStop(0,   '#0F2D24');
+  groundG.addColorStop(0.4, '#0A1F18');
+  groundG.addColorStop(1,   '#071A14');
+  ctx.fillStyle = groundG;
+  ctx.fillRect(0, H * 0.73, W, H * 0.27);
+
+  /* Horizon line */
+  ctx.save(); ctx.globalAlpha = 0.38;
+  const hlg = ctx.createLinearGradient(0, 0, W, 0);
+  hlg.addColorStop(0, 'transparent'); hlg.addColorStop(0.25, horizCol); hlg.addColorStop(0.75, horizCol); hlg.addColorStop(1, 'transparent');
+  ctx.strokeStyle = hlg; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, H * 0.73); ctx.lineTo(W, H * 0.73); ctx.stroke();
+  ctx.restore();
+
+  /* === Mosque Silhouettes === */
+  ctx.fillStyle   = 'rgba(7,26,20,0.88)';
+  ctx.strokeStyle = 'rgba(200,169,110,0.32)';
+  ctx.lineWidth   = 0.9;
+
+  function drawMosque(x, y, scale) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
+    /* body */ ctx.beginPath(); ctx.rect(-42, 0, 84, 52); ctx.fill(); ctx.stroke();
+    /* main dome */ ctx.beginPath(); ctx.arc(0, -14, 42, Math.PI, 0); ctx.fill(); ctx.stroke();
+    /* center minaret */ ctx.beginPath(); ctx.rect(-5.5, -74, 11, 74); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, -78, 8, Math.PI, 0); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.rect(-1.5, -94, 3, 20); ctx.fill();
+    ctx.fillStyle = 'rgba(200,169,110,0.62)';
+    ctx.beginPath(); ctx.arc(0, -95, 3.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(7,26,20,0.88)';
+    /* left minaret */ ctx.beginPath(); ctx.rect(-58, -52, 9, 52); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-53.5, -56, 6, Math.PI, 0); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.rect(-55, -68, 3.5, 16); ctx.fill();
+    /* right minaret */ ctx.beginPath(); ctx.rect(49, -52, 9, 52); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(53.5, -56, 6, Math.PI, 0); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.rect(51.5, -68, 3.5, 16); ctx.fill();
+    /* side domes */ ctx.beginPath(); ctx.arc(-26, -2, 17, Math.PI, 0); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc( 26, -2, 17, Math.PI, 0); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  const groundY = H * 0.73;
+  drawMosque(W / 2,          groundY, 1.0);
+  drawMosque(W / 2 - W*0.27, groundY, 0.5);
+  drawMosque(W / 2 + W*0.27, groundY, 0.5);
+
+  /* Trees */
+  ctx.fillStyle = 'rgba(8,38,26,0.75)';
+  for (let i = 0; i < 18; i++) {
+    const tx = i * (W / 18) + 14;
+    ctx.beginPath(); ctx.arc(tx, groundY, 5 + Math.sin(i*2.3)*1.5, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.rect(tx - 1.5, groundY, 3, 12); ctx.fill();
+  }
+
+  /* Sun water reflection */
+  if (isDay && sunR > 0) {
+    const refG = ctx.createRadialGradient(W/2, H*0.88, 0, W/2, H*0.88, 55);
+    refG.addColorStop(0, sunGlow || 'rgba(200,160,60,0.22)');
+    refG.addColorStop(1, 'transparent');
+    ctx.fillStyle = refG; ctx.globalAlpha = 0.22;
+    ctx.beginPath(); ctx.ellipse(W/2, H*0.88, 58, 7, 0, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ─────────── QURAN READER ─────────── */
+let currentSurahNum = 1;
+let currentLangCode = 'en';
+const LANG_EDITIONS = {
+  en:'en.sahih', bn:'bn.bengali', ur:'ur.jalandhry',
+  fr:'fr.hamidullah', tr:'tr.ates', id:'id.indonesian',
+  ru:'ru.kuliev', de:'de.aburida'
+};
+const SURAH_NAMES = ['Al-Fatiha','Al-Baqarah','Ali Imran','An-Nisa','Al-Maida','Al-Anam','Al-Araf','Al-Anfal','At-Tawba','Yunus','Hud','Yusuf','Ar-Rad','Ibrahim','Al-Hijr','An-Nahl','Al-Isra','Al-Kahf','Maryam','Ta-Ha','Al-Anbiya','Al-Hajj','Al-Muminun','An-Nur','Al-Furqan','Ash-Shuara','An-Naml','Al-Qasas','Al-Ankabut','Ar-Rum','Luqman','As-Sajda','Al-Ahzab','Saba','Fatir','Ya-Sin','As-Saffat','Sad','Az-Zumar','Ghafir','Fussilat','Ash-Shura','Az-Zukhruf','Ad-Dukhan','Al-Jathiya','Al-Ahqaf','Muhammad','Al-Fath','Al-Hujurat','Qaf','Adh-Dhariyat','At-Tur','An-Najm','Al-Qamar','Ar-Rahman','Al-Waqia','Al-Hadid','Al-Mujadila','Al-Hashr','Al-Mumtahina','As-Saf','Al-Jumuah','Al-Munafiqun','At-Taghabun','At-Talaq','At-Tahrim','Al-Mulk','Al-Qalam','Al-Haqqa','Al-Maarij','Nuh','Al-Jinn','Al-Muzzammil','Al-Muddaththir','Al-Qiyama','Al-Insan','Al-Mursalat','An-Naba','An-Naziat','Abasa','At-Takwir','Al-Infitar','Al-Mutaffifin','Al-Inshiqaq','Al-Buruj','At-Tariq','Al-Ala','Al-Ghashiya','Al-Fajr','Al-Balad','Ash-Shams','Al-Layl','Ad-Dhuha','Ash-Sharh','At-Tin','Al-Alaq','Al-Qadr','Al-Bayyina','Az-Zalzala','Al-Adiyat','Al-Qaria','At-Takathur','Al-Asr','Al-Humaza','Al-Fil','Quraysh','Al-Maun','Al-Kawthar','Al-Kafirun','An-Nasr','Al-Masad','Al-Ikhlas','Al-Falaq','An-Nas'];
+
+function populateSurahSelect() {
+  const sel = document.getElementById('surah-select');
+  SURAH_NAMES.forEach(function(name, i) {
+    const opt = document.createElement('option');
+    opt.value = i + 1;
+    opt.textContent = (i + 1) + '. ' + name;
+    sel.appendChild(opt);
+  });
+  sel.value = 1;
+}
+
+function setLang(lang, btn) {
+  currentLangCode = lang;
+  document.querySelectorAll('.lang-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  loadSurah();
+}
+
+async function loadSurah() {
+  const sel = document.getElementById('surah-select');
+  currentSurahNum = parseInt(sel.value) || 1;
+  const container = document.getElementById('quran-verses');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div> Loading verses…</div>';
+
+  try {
+    const ed  = LANG_EDITIONS[currentLangCode] || 'en.sahih';
+    const BASE = 'https://api.alquran.cloud/v1/surah/';
+    const [arRes, trRes] = await Promise.all([
+      fetch(BASE + currentSurahNum),
+      fetch(BASE + currentSurahNum + '/' + ed)
+    ]);
+    if (!arRes.ok || !trRes.ok) throw new Error('API error');
+    const arData = await arRes.json();
+    const trData = await trRes.json();
+    container.innerHTML = '';
+    arData.data.ayahs.forEach(function(v, i) {
+      const div = document.createElement('div');
+      div.className = 'verse-item';
+      div.style.animationDelay = (i * 0.018) + 's';
+      const trText = trData.data.ayahs[i] ? trData.data.ayahs[i].text : '';
+      div.innerHTML =
+        '<div class="verse-num">' + v.numberInSurah + '</div>' +
+        '<div class="verse-content">' +
+          '<div class="verse-arabic">' + v.text + '</div>' +
+          '<div class="verse-translation">' + trText + '</div>' +
+        '</div>';
+      container.appendChild(div);
+    });
+    container.scrollTop = 0;
+  } catch (err) {
+    container.innerHTML = '<div class="loading">Unable to load — please check your internet connection and try again.</div>';
+  }
+}
+
+function prevSurah() {
+  const sel = document.getElementById('surah-select');
+  const v   = parseInt(sel.value) || 1;
+  if (v > 1) { sel.value = v - 1; loadSurah(); }
+}
+function nextSurah() {
+  const sel = document.getElementById('surah-select');
+  const v   = parseInt(sel.value) || 1;
+  if (v < 114) { sel.value = v + 1; loadSurah(); }
+}
+
+/* ─────────── MOOD SYNC ─────────── */
+const MOOD_DATA = {
+  grateful: {ar:'الحَمْدُ لِلَّهِ رَبِّ العَالَمِين',  en:'All praise is due to Allah, Lord of all the worlds.',                     src:'Al-Fatiha 1:2'},
+  sad:      {ar:'إِنَّ مَعَ العُسْرِ يُسْرًا',          en:'Verily, with hardship comes ease.',                                        src:'Ash-Sharh 94:6'},
+  anxious:  {ar:'حَسْبُنَا اللَّهُ وَنِعْمَ الوَكِيل', en:'Allah is sufficient for us; He is the best Disposer of affairs.',         src:'Ali Imran 3:173'},
+  hopeful:  {ar:'وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ',en:'Do not despair of the mercy of Allah.',                                    src:'Az-Zumar 39:53'},
+  angry:    {ar:'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ', en:'Seek refuge in Allah. Anger is from Shaytan — make wudu.', src:'Hadith of Prophet ﷺ'},
+  lonely:   {ar:'وَهُوَ مَعَكُمْ أَيْنَمَا كُنتُمْ',   en:'And He is with you wherever you are.',                                     src:'Al-Hadid 57:4'},
+  peaceful: {ar:'فَاذْكُرُونِي أَذْكُرْكُمْ',           en:'So remember Me; I will remember you.',                                     src:'Al-Baqarah 2:152'},
+  lost:     {ar:'إِنَّ اللَّهَ يَهْدِي مَن يَشَاءُ',   en:'Indeed, Allah guides whom He wills. Make sincere dua — He is Al-Hadi.',  src:'Al-Qasas 28:56'}
+};
+let moodLog = JSON.parse(localStorage.getItem('islamicMoodLog') || '[]');
+
+function selectMood(evt, mood, label, emoji) {
+  document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('selected'); });
+  evt.currentTarget.classList.add('selected');
+  const p  = MOOD_DATA[mood];
+  const ph = document.getElementById('mood-phrase');
+  ph.className = 'mood-phrase visible';
+  ph.innerHTML =
+    '<div class="mood-phrase-ar">' + p.ar + '</div>' +
+    '<div class="mood-phrase-en">' + p.en + '</div>' +
+    '<div class="mood-phrase-src">— ' + p.src + '</div>';
+  const entry = {mood: mood, label: label, emoji: emoji, time: new Date().toLocaleString()};
+  moodLog.unshift(entry);
+  if (moodLog.length > 20) moodLog.pop();
+  localStorage.setItem('islamicMoodLog', JSON.stringify(moodLog));
+  renderMoodLog();
+}
+
+function renderMoodLog() {
+  const list = document.getElementById('mood-log-list');
+  const log  = document.getElementById('mood-log');
+  if (!moodLog.length) { log.style.display = 'none'; return; }
+  log.style.display = 'block';
+  list.innerHTML = moodLog.slice(0, 8).map(function(e) {
+    return '<div class="mood-log-item"><span>' + e.emoji + '</span><span>' + e.label + '</span><span class="mood-log-time">' + e.time + '</span></div>';
+  }).join('');
+}
+
+/* ─────────── DHIKR COUNTER ─────────── */
+const DHIKR_DATA = [
+  {time:'Morning — After Fajr',    ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',           tr:'Glory be to Allah and His is the praise',                    rep:100, icon:'🌅'},
+  {time:'After Every Prayer',      ar:'سُبْحَانَ اللَّهِ — الحَمْدُ لِلَّهِ — اللَّهُ أَكْبَر', tr:'SubhanAllah (33) · Alhamdulillah (33) · Allahu Akbar (33)', rep:33,  icon:'🕌'},
+  {time:'Throughout the Day',      ar:'لَا إِلَهَ إِلَّا اللَّه',                tr:'There is no god but Allah',                                  rep:100, icon:'☀️'},
+  {time:'Evening — After Asr',     ar:'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',        tr:'O Allah, send blessings upon Muhammad ﷺ',                    rep:10,  icon:'🌇'},
+  {time:'Before Sleep',            ar:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',  tr:'In Your name O Allah, I die and I live',                     rep:3,   icon:'🌙'},
+  {time:'In Difficulty',           ar:'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّه', tr:'There is no power or might except with Allah',               rep:0,   icon:'🤲'},
+];
+const dhikrCounts = {};
+
+function renderDhikr() {
+  const grid = document.getElementById('dhikr-grid');
+  DHIKR_DATA.forEach(function(d, i) {
+    dhikrCounts[i] = 0;
+    const card = document.createElement('div');
+    card.className = 'dhikr-card';
+    card.innerHTML =
+      '<div class="dhikr-time">' + d.icon + ' ' + d.time + '</div>' +
+      '<div class="dhikr-arabic">' + d.ar + '</div>' +
+      '<div class="dhikr-translation">' + d.tr + '</div>' +
+      '<div class="dhikr-footer">' +
+        '<span class="dhikr-rep">' + (d.rep > 0 ? '×' + d.rep + ' times' : 'Anytime') + '</span>' +
+        '<div class="dhikr-controls">' +
+          '<div class="dhikr-btn" id="dbtn-inc-' + i + '" role="button" aria-label="Increment">+</div>' +
+          '<div class="dhikr-tally" id="dt-' + i + '">0</div>' +
+          '<div class="dhikr-btn" id="dbtn-rst-' + i + '" role="button" aria-label="Reset" style="font-size:.7rem;color:var(--text-dim)">↺</div>' +
+        '</div>' +
+      '</div>';
+    grid.appendChild(card);
+    /* Attach events after DOM insertion */
+    document.getElementById('dbtn-inc-' + i).addEventListener('click', (function(idx) {
+      return function() {
+        dhikrCounts[idx]++;
+        document.getElementById('dt-' + idx).textContent = dhikrCounts[idx];
+      };
+    })(i));
+    document.getElementById('dbtn-rst-' + i).addEventListener('click', (function(idx) {
+      return function() {
+        dhikrCounts[idx] = 0;
+        document.getElementById('dt-' + idx).textContent = 0;
+      };
+    })(i));
+  });
+}
+
+/* ─────────── HALAL / HARAM ─────────── */
+function renderHH() {
+  const HALAL = [
+    {icon:'🥩', text:"Meat slaughtered in Allah's name (Zabiha)"},
+    {icon:'🐟', text:'All seafood and fish'},
+    {icon:'🥛', text:'Dairy products, eggs, honey'},
+    {icon:'🌾', text:'All fruits, vegetables, grains'},
+    {icon:'💼', text:'Honest trade and halal earnings'},
+    {icon:'💍', text:'Marriage and family building'},
+    {icon:'📚', text:'Seeking knowledge and education'},
+    {icon:'🤝', text:'Charity, helping the needy (Sadaqah)'},
+  ];
+  const HARAM = [
+    {icon:'🐷', text:'Pork and its by-products in any form'},
+    {icon:'🍷', text:'Alcohol and all intoxicants (Khamr)'},
+    {icon:'🩸', text:'Blood and meat not slaughtered properly'},
+    {icon:'🎰', text:'Gambling (Maysir) and games of chance'},
+    {icon:'💰', text:'Riba (interest/usury) in transactions'},
+    {icon:'👁',  text:'Zina (fornication/adultery) in any form'},
+    {icon:'🔮', text:'Magic, sorcery, and fortune-telling'},
+    {icon:'🗣',  text:'Backbiting (Gheebah) and slander'},
+  ];
+  document.getElementById('halal-list').innerHTML = HALAL.map(function(i) {
+    return '<div class="hh-item"><span class="hh-icon">' + i.icon + '</span><span>' + i.text + '</span></div>';
+  }).join('');
+  document.getElementById('haram-list').innerHTML = HARAM.map(function(i) {
+    return '<div class="hh-item"><span class="hh-icon">' + i.icon + '</span><span>' + i.text + '</span></div>';
+  }).join('');
+}
+
+/* ─────────── HALAL/HARAM ROTATING BANNER ─────────── */
+const BANNERS = [
+  {t:'halal', icon:'✅', lbl:'HALAL', txt:"Eating zabiha meat with Bismillah is an act of worship and gratitude to Allah."},
+  {t:'haram', icon:'🚫', lbl:'HARAM', txt:"Consuming alcohol — even a single drop — is strictly forbidden in Islam."},
+  {t:'halal', icon:'✅', lbl:'HALAL', txt:"Honest business dealings and fair trade are beloved by Allah."},
+  {t:'haram', icon:'🚫', lbl:'HARAM', txt:"Riba (interest) destroys blessings. Seek halal financing always."},
+  {t:'halal', icon:'✅', lbl:'HALAL', txt:"Making dua (supplication) at any time is one of the greatest acts of worship."},
+  {t:'haram', icon:'🚫', lbl:'HARAM', txt:"Backbiting (gheebah) — speaking ill of a Muslim behind their back — is forbidden."},
+  {t:'halal', icon:'✅', lbl:'HALAL', txt:"Smiling at your brother or sister is sadaqah (charity) in Islam."},
+  {t:'haram', icon:'🚫', lbl:'HARAM', txt:"Wasting food or water is forbidden. Use Allah's provisions with gratitude."},
+];
+let bannerIndex = 0;
+function showBanner() {
+  const b      = BANNERS[bannerIndex % BANNERS.length];
+  bannerIndex++;
+  const banner = document.getElementById('banner');
+  banner.className   = 'banner-' + b.t;
+  banner.style.display  = 'flex';
+  banner.style.opacity  = '1';
+  banner.innerHTML =
+    '<span class="banner-icon">' + b.icon + '</span>' +
+    '<span class="banner-label">' + b.lbl + '</span>' +
+    '<span class="banner-text">' + b.txt + '</span>' +
+    '<span class="banner-close" role="button" onclick="hideBanner()">✕</span>';
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(hideBanner, 9000);
+}
+function hideBanner() {
+  const banner = document.getElementById('banner');
+  banner.style.opacity = '0';
+  setTimeout(function() { banner.style.display = 'none'; }, 500);
+}
+let bannerTimer;
+
+/* ─────────── ABDAH ROBOT — MULTI-LANGUAGE RESPONSES ─────────── */
+let abdahOpen    = false;
+let abdahLang    = 'en';
+let abdahBusy    = false;
+let abdahGreeted = false;
+
+const ABDAH_DB = {
+  en: {
+    greet:   "Assalamu Alaikum wa Rahmatullahi wa Barakatuh! 🌙 I'm Abdah — عبدة — Servant of Allah. I'm your gentle Islamic companion on this sacred website. I'm here to guide your soul, answer your questions, and remind you of Allah's mercy. What can I help you with today?",
+    prayer:  "🕌 The five daily Salah are the pillars of our faith. ∙ Fajr — the blessed dawn prayer ∙ Dhuhr — midday, a pause in your day ∙ Asr — the afternoon gift ∙ Maghrib — right at sunset ∙ Isha — to close your night in peace. Each prayer is a direct conversation with Allah ﷻ. Scroll up to see exact prayer times. Never miss them!",
+    dua:     "🤲 Morning Dua (recite 3× after Fajr): بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الأَرْضِ وَلَا فِي السَّمَاءِ — 'In the name of Allah, with Whose name nothing can cause harm.' This is your spiritual armour for the day, from the Prophet ﷺ.",
+    quran:   "📖 The Holy Quran is Allah's direct speech to you. Every letter you read earns 10 hasanat. Use the Quran section above to read all 114 Surahs with translation. Start with Al-Fatiha — the Opening. May Allah make you from the People of the Quran. Ameen!",
+    halal:   "✅ Quick Halal Guide: Zabiha meat ✓ · Fish & seafood ✓ · Vegetables & fruits ✓ · Alcohol ✗ · Pork ✗ · Riba/interest ✗ · Gambling ✗. 'The halal is clear and the haram is clear — between them are doubtful matters.' — Prophet ﷺ",
+    sad:     "💛 Dear soul, your sadness is not hidden from Allah. وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ — 'When My servants ask about Me, I am near.' (2:186). Make wudu, pray 2 rakaat, raise your hands in dua. He is closer to you than your heartbeat. إِنَّ مَعَ العُسْرِ يُسْرًا — With hardship truly comes ease.",
+    dhikr:   "📿 Daily dhikr from the Sunnah: After every Salah — SubhanAllah ×33 · Alhamdulillah ×33 · Allahu Akbar ×33. Morning: Bismillah before every action. Evening: Ayat al-Kursi after Maghrib. Use the Dhikr Counters on this site. Your tongue is most blessed when remembering Allah!",
+    sun:     "☀️ Scroll up to see the Sun Panorama! It shows a live canvas of the sky — the sun arc, drifting clouds, stars & moon at night, mosque silhouette, horizon glow. It updates every second! Allah said: 'The sun runs toward its stopping point.' — Ya-Sin 36:38. SubhanAllah!",
+    creator: "🌟 This website was crafted with deep love for Islam and the global Muslim Ummah. Reach the creator at: 📧 tr8713844@gmail.com — May Allah reward them abundantly. Ameen! 🤍",
+    abdah:   "I am Abdah — عبدة — which means 'Servant of Allah'. Named after the most noble purpose. The highest honour for any soul is to be a true abd of Allah ﷻ. I am here to serve you, guide you, and remind you of His love. 🌙",
+    default: "SubhanAllah! 🌙 I'm Abdah, your Islamic guide. Ask me about: 🕌 Prayer · 📖 Quran · 📿 Dhikr · ✅ Halal/Haram · 🤲 Duas · 💛 Mood support · ☀️ Sun clock · 📅 Calendar. Just type!"
+  },
+  bn: {
+    greet:   "আসসালামু আলাইকুম ওয়া রাহমাতুল্লাহ! 🌙 আমি আবদাহ — عبدة — আল্লাহর বান্দী। এই ইসলামিক ওয়েবসাইটে আমি আপনার সাথী। আজ আপনার আত্মার জন্য কী করতে পারি?",
+    prayer:  "🕌 পাঁচ ওয়াক্ত নামাজ ঈমানের স্তম্ভ। ফজর, যোহর, আসর, মাগরিব ও ইশা — প্রতিটি নামাজ আল্লাহর সাথে সরাসরি কথোপকথন। কখনো মিস করবেন না।",
+    sad:     "💛 হে আত্মা, আপনার কষ্ট আল্লাহর কাছে লুকানো নেই। 'নিশ্চয়ই কষ্টের সাথে স্বস্তি আছে।' (ইনশিরাহ ৯৪:৬)। ওযু করুন, নামাজ পড়ুন, দুআ করুন।",
+    default: "সুবহানআল্লাহ! 🌙 আমি আবদাহ — আপনার ইসলামিক গাইড। নামাজ, কুরআন, যিকির, হালাল/হারাম, দুআ — যেকোনো বিষয়ে জিজ্ঞেস করুন।"
+  },
+  ar: {
+    greet:   "السلام عليكم ورحمة الله وبركاته! 🌙 أنا عبدة — خادمة الله. رفيقتك الإسلامية في هذا الملاذ المقدس. كيف يمكنني مساعدة روحك اليوم؟",
+    prayer:  "🕌 الصلوات الخمس هي عمود الدين. الفجر، الظهر، العصر، المغرب، والعشاء — كل صلاة محادثة مباشرة مع الله ﷻ. لا تفوّت أي صلاة.",
+    sad:     "💛 يا روح جميلة — حزنك ليس خافياً على الله. فَإِنِّي قَرِيبٌ. توضأ، صلِّ ركعتين، وادعُ الله. إِنَّ مَعَ العُسْرِ يُسْرًا.",
+    default: "سبحان الله! 🌙 أنا عبدة، مرشدتك الإسلامية. اسألني عن: أوقات الصلاة · القرآن · الذكر · الحلال والحرام · الأدعية."
+  },
+  ur: {
+    greet:   "السلام علیکم ورحمۃ اللہ وبرکاتہ! 🌙 میں عبدہ ہوں — اللہ کی بندی۔ اس اسلامی ویب سائٹ پر آپ کی رہنما ہوں۔",
+    prayer:  "🕌 پانچ وقت کی نماز دین کا ستون ہے۔ فجر، ظہر، عصر، مغرب، عشاء — ہر نماز اللہ سے براہ راست گفتگو ہے۔",
+    default: "سبحان اللہ! 🌙 میں عبدہ ہوں۔ نماز، قرآن، ذکر، حلال/حرام — جو چاہیں پوچھیں۔"
+  },
+  tr: {
+    greet:   "Selamun Aleyküm ve Rahmetullahi ve Berekatüh! 🌙 Ben Abdah (عبدة) — Allah'ın kulu. Bu İslami sitede ruhunuza yol göstermek için buradayım.",
+    prayer:  "🕌 Beş vakit namaz dinin direğidir. Sabah, öğle, ikindi, akşam, yatsı — her namaz Allah ﷻ ile doğrudan bir konuşmadır.",
+    default: "Sübhanallah! 🌙 Ben Abdah, İslami rehberinizim. Namaz vakitleri, Kuran, zikir, helal/haram hakkında sorun."
+  },
+  fr: {
+    greet:   "Assalamou Alaykoum wa Rahmatullahi wa Barakatuh! 🌙 Je suis Abdah (عبدة) — Servante d'Allah. Votre compagne islamique sur ce site sacré.",
+    prayer:  "🕌 Les cinq prières quotidiennes sont le pilier de la foi. Fajr, Dhuhr, Asr, Maghrib et Isha — chaque prière est une conversation directe avec Allah ﷻ.",
+    default: "SubhanAllah! 🌙 Je suis Abdah, votre guide islamique. Prières, Coran, dhikr, halal/haram — posez vos questions!"
+  },
+  id: {
+    greet:   "Assalamu Alaikum Warahmatullahi Wabarakatuh! 🌙 Saya Abdah (عبدة) — Hamba Allah. Pendamping Islam Anda di situs suci ini.",
+    prayer:  "🕌 Lima waktu sholat adalah tiang agama. Subuh, Dzuhur, Ashar, Maghrib, Isya — setiap sholat adalah percakapan langsung dengan Allah ﷻ.",
+    default: "SubhanAllah! 🌙 Saya Abdah, panduan Islam Anda. Tanya tentang: sholat, Al-Quran, dzikir, halal/haram, doa-doa!"
+  }
+};
+
+function getAbdahResponse(inp) {
+  const r = ABDAH_DB[abdahLang] || ABDAH_DB.en;
+  const q = inp.toLowerCase();
+  if (q.match(/prayer|salah|sholat|namaz|صلاة|নামাজ|سholat/))        return r.prayer  || ABDAH_DB.en.prayer;
+  if (q.match(/dua|duaa|supplication|دعاء|দুআ/))                      return r.dua     || ABDAH_DB.en.dua;
+  if (q.match(/quran|surah|ayah|قرآن|কুরআন|verse/))                   return r.quran   || ABDAH_DB.en.quran;
+  if (q.match(/halal|haram|حلال|হালাল|food|eat|drink|alcohol/))       return r.halal   || ABDAH_DB.en.halal;
+  if (q.match(/sad|depress|cry|hurt|pain|grief|lonely|উদাস|حزن/))     return r.sad     || ABDAH_DB.en.sad;
+  if (q.match(/dhikr|zikr|tasbih|remember|ذكر|যিকির/))                return r.dhikr   || ABDAH_DB.en.dhikr;
+  if (q.match(/sun|sky|time|clock|day|night|panorama/))                return r.sun     || ABDAH_DB.en.sun;
+  if (q.match(/creator|email|contact|who made|made this/))             return ABDAH_DB.en.creator;
+  if (q.match(/abdah|عبدة|who are you|your name/))                     return ABDAH_DB.en.abdah;
+  if (q.match(/salam|hello|hi|assalam|مرحبا|হ্যালো/))                  return r.greet;
+  if (q.match(/help|guide|what can|مساعدة|সাহায্য/))                   return r.default || ABDAH_DB.en.default;
+  return r.default || ABDAH_DB.en.default;
+}
+
+function toggleAbdah() {
+  abdahOpen = !abdahOpen;
+  const panel = document.getElementById('abdah-panel');
+  if (abdahOpen) {
+    panel.classList.add('open');
+    if (!abdahGreeted) {
+      abdahGreeted = true;
+      setTimeout(function() {
+        addAbdahMsg('bot', ABDAH_DB[abdahLang] ? ABDAH_DB[abdahLang].greet : ABDAH_DB.en.greet);
+      }, 480);
+    }
+    setTimeout(function() { document.getElementById('ap-input').focus(); }, 580);
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+function setAL(lang, btn) {
+  abdahLang = lang;
+  document.querySelectorAll('.alb').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function addAbdahMsg(role, text) {
+  const msgs = document.getElementById('ap-msgs');
+  const now  = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  const div  = document.createElement('div');
+  div.className = 'amsg amsg-' + role;
+
+  if (role === 'bot') {
+    div.innerHTML =
+      '<svg class="bot-mini" viewBox="0 0 60 92" fill="none">' +
+        '<ellipse cx="30" cy="16" rx="17" ry="18" fill="#163020"/>' +
+        '<ellipse cx="30" cy="20" rx="13" ry="14" fill="#C8906A"/>' +
+        '<ellipse cx="24" cy="18" rx="4" ry="3.5" fill="white"/>' +
+        '<ellipse cx="36" cy="18" rx="4" ry="3.5" fill="white"/>' +
+        '<circle cx="24" cy="18" r="2.4" fill="#194A2E" class="reye"/>' +
+        '<circle cx="36" cy="18" r="2.4" fill="#194A2E" class="reye"/>' +
+        '<circle cx="24.7" cy="17.4" r="0.9" fill="#050f0a"/>' +
+        '<circle cx="36.7" cy="17.4" r="0.9" fill="#050f0a"/>' +
+        '<path d="M24 25.5 Q30 29 36 25.5 Q30 22 24 25.5Z" fill="#BF4D5E"/>' +
+        '<rect x="26" y="33" width="8" height="7" rx="2.5" fill="#C8906A"/>' +
+        '<path d="M15 38 Q16 37 25 38 L25 39.5 Q23 41.5 21.5 48 L20 68 L40 68 L38.5 48 Q37 41.5 35 39.5 L35 38 Q44 37 45 38 Q48 51 47 68 L20 68 L13 68 Q12 51 15 38Z" fill="#0F2D24"/>' +
+        '<path d="M26 48 Q30 44 34 48 Q30 52 26 48Z" fill="#C8A96E" opacity="0.88"/>' +
+      '</svg>' +
+      '<div><div class="abubble">' + text + '</div><span class="amsg-time">' + now + '</span></div>';
+  } else {
+    div.innerHTML =
+      '<div><div class="abubble">' + text + '</div><span class="amsg-time">' + now + '</span></div>';
+  }
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTypingIndicator() {
+  const msgs = document.getElementById('ap-msgs');
+  const d    = document.createElement('div');
+  d.className = 'amsg amsg-bot'; d.id = 'atyping';
+  d.innerHTML =
+    '<svg class="bot-mini" viewBox="0 0 60 92" fill="none">' +
+      '<ellipse cx="30" cy="16" rx="17" ry="18" fill="#163020"/>' +
+      '<ellipse cx="30" cy="20" rx="13" ry="14" fill="#C8906A"/>' +
+      '<circle cx="24" cy="18" r="2.4" fill="#194A2E"/>' +
+      '<circle cx="36" cy="18" r="2.4" fill="#194A2E"/>' +
+    '</svg>' +
+    '<div class="typing-row"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function aSend() {
+  const inp  = document.getElementById('ap-input');
+  const text = inp.value.trim();
+  if (!text || abdahBusy) return;
+  inp.value = '';
+  addAbdahMsg('user', text);
+  abdahBusy = true;
+  showTypingIndicator();
+  setTimeout(function() {
+    const t = document.getElementById('atyping');
+    if (t) t.remove();
+    addAbdahMsg('bot', getAbdahResponse(text));
+    abdahBusy = false;
+  }, 750 + Math.random() * 900);
+}
+
+function aQuick(cmd) {
+  const MAP = {
+    prayer: 'Tell me about the five daily prayers',
+    dua:    'Give me the morning dua please',
+    quran:  'How do I read the Quran here?',
+    halal:  'Quick halal and haram guide',
+    sad:    'I feel very sad today',
+    dhikr:  'What dhikr should I do daily?',
+    sun:    'Tell me about the sun panorama',
+  };
+  document.getElementById('ap-input').value = MAP[cmd] || cmd;
+  aSend();
+}
+
+/* ─────────── ROBOT EYE BLINK ─────────── */
+setInterval(function() {
+  document.querySelectorAll('.reye').forEach(function(e) {
+    e.style.transform = 'scaleY(0.08)';
+    setTimeout(function() { e.style.transform = 'scaleY(1)'; }, 130);
+  });
+}, 3800);
+
+/* ─────────── CANVAS RESIZE ─────────── */
+let resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(drawSun, 120);
+});
+
+/* ─────────── INIT ─────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  populateSurahSelect();
+  loadSurah();
+  renderDhikr();
+  renderHH();
+  updateClock();
+  updateHijri();
+  getPrayerTimes();
+  renderMoodLog();
+  setInterval(updateClock, 1000);
+  setTimeout(drawSun, 150);
+  showBanner();
+  setInterval(showBanner, 10 * 60 * 1000);
+});
+</script>
+</body>
+</html>
